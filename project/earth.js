@@ -50,6 +50,8 @@ var eye;
 var at = vec3(0.0, 0.0, 0.0);
 var up = vec3(0.0, 1.0, 0.0);
 
+var step = 5;
+
 function triangle(a, b, c) {
 
      pointsArray.push(a);
@@ -64,6 +66,35 @@ function triangle(a, b, c) {
 
 
      index += 3;
+}
+
+function spherePoint(lat, lon) {
+    var phi    = radians(lat);
+    var lambda = radians(lon);
+
+    var x = Math.cos(phi) * Math.cos(lambda);
+    var y = Math.sin(phi);
+    var z = Math.cos(phi) * Math.sin(lambda);
+
+    return vec4(x, y, z, 1.0);
+}
+
+function makeGlobe() {
+    for (var i = 0; i < 180 / step; i++) {
+        for (var j = 0; j < 360 / step; j++) {
+
+            var lat = -90 + i * step;
+            var lon = j * step;
+
+            var bl = spherePoint(lat, lon);                 
+            var br = spherePoint(lat, lon + step);          
+            var tl = spherePoint(lat + step, lon);          
+            var tr = spherePoint(lat + step, lon + step);   
+
+            triangle(tl, tr, bl);
+            triangle(tr, br, bl);
+        }
+    }
 }
 
 
@@ -120,7 +151,7 @@ window.onload = function init() {
     var specularProduct = mult(lightSpecular, materialSpecular);
 
 
-    tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
+    makeGlobe();
 
     var nBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer);
