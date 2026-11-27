@@ -50,9 +50,10 @@ var eye;
 var at = vec3(0.0, 0.0, 0.0);
 var up = vec3(0.0, 1.0, 0.0);
 
-var step = 5;
+var step = 2;
 var spin = 1.0;
-var k = 0.15; 
+var k = 0.08; 
+var heightData, heightW, heightH; 
 
 function triangle(a, b, c) {
 
@@ -72,16 +73,34 @@ function triangle(a, b, c) {
      index += 3;
 }
 
+// 이미지를 불러와서 픽셀 값을 배열로 꺼내두기
+function loadHeightMap(src, callback) {
+    var img = new Image();
+    img.onload = function () {
+        var c = document.createElement("canvas");
+        c.width = img.width;
+        c.height = img.height;
+        var ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        heightData = ctx.getImageData(0, 0, img.width, img.height).data;
+        heightW = img.width;
+        heightH = img.height;
+        callback();
+    };
+    img.src = src;
+}
+
 function height(lat, lon) {
-    var dLat = lat - 37;             
-    var dLon = lon - 127;            
+    // (위도, 경도) → 이미지 좌표 (0~1)
+    var u = ((((180 - lon) % 360) + 360) % 360) / 360;
+    var v = (90 - lat) / 180;
 
-    var x = Math.sqrt(dLat * dLat + dLon * dLon);   
+    // 0~1 → 픽셀 번호
+    var px = Math.min(heightW - 1, Math.floor(u * heightW));
+    var py = Math.min(heightH - 1, Math.floor(v * heightH));
 
-    if (x > 20) {                    
-        return 0;
-    }
-    return 1 - x / 20;               
+    // 그 픽셀의 밝기(0~255)를 0~1로
+    return heightData[4 * (py * heightW + px)] / 255;
 }
 
 function spherePoint(lat, lon) {
@@ -145,8 +164,11 @@ function tetrahedron(a, b, c, d, n) {
     divideTriangle(a, c, d, n);
 }
 
-window.onload = function init() {
+window.onload = function () {
+    loadHeightMap("srtm_ramp2.world.5400x2700.jpg", init);
+};
 
+function init() {
     canvas = document.getElementById( "gl-canvas" );
 
     gl = WebGLUtils.setupWebGL( canvas );
@@ -242,19 +264,18 @@ function render() {
 
     projectionMatrix = ortho(left, right, bottom, ytop, near, far);
 
-        normalMatrix = [
-        vec3(modelViewMatrix[0][0], modelViewMatrix[0][1], modelViewMatrix[0][2]),
-        vec3(modelViewMatrix[1][0], modelViewMatrix[1][1], modelViewMatrix[1][2]),
-        vec3(modelViewMatrix[2][0], modelViewMatrix[2][1], modelViewMatrix[2][2])
-    ];
+        normalMatrix = mat3(
+            modelViewMatrix[0][0], modelViewMatrix[0][1], modelViewMatrix[0][2],
+            modelViewMatrix[1][0], modelViewMatrix[1][1], modelViewMatrix[1][2],
+            modelViewMatrix[2][0], modelViewMatrix[2][1], modelViewMatrix[2][2]
+        );
 
 
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix) );
     gl.uniformMatrix3fv(normalMatrixLoc, false, flatten(normalMatrix) );
 
-    for( var i=0; i<index; i+=3)
-        gl.drawArrays( gl.TRIANGLES, i, 3 );
+    gl.drawArrays(gl.TRIANGLES, 0, index);
 
     window.requestAnimFrame(render);
 }
