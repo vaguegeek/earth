@@ -51,6 +51,7 @@ var at = vec3(0.0, 0.0, 0.0);
 var up = vec3(0.0, 1.0, 0.0);
 
 var step = 5;
+var spin = 1.0;
 
 function triangle(a, b, c) {
 
@@ -219,7 +220,9 @@ function render() {
     eye = vec3(radius*Math.sin(theta)*Math.cos(phi),
         radius*Math.sin(theta)*Math.sin(phi), radius*Math.cos(theta));
 
-    modelViewMatrix = lookAt(eye, at , up);
+    spin += 0.5;
+    modelViewMatrix = mult(lookAt(eye, at, up), rotateY(spin));
+
     projectionMatrix = ortho(left, right, bottom, ytop, near, far);
 
         normalMatrix = [
