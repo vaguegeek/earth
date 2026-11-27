@@ -60,6 +60,8 @@ function triangle(a, b, c) {
      pointsArray.push(b);
      pointsArray.push(c);
 
+     var n = normalize(cross(subtract(b, a), subtract(c, a)));
+
           // normals are vectors
 
      normalsArray.push(a[0],a[1], a[2], 0.0);
