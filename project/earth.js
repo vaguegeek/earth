@@ -9,6 +9,7 @@ var index = 0;
 
 var pointsArray = [];
 var normalsArray = [];
+var heightsArray = [];
 
 
 var near = -10;
@@ -33,8 +34,8 @@ var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
-var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
-var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0 );
+var materialAmbient = vec4( 1.0, 1.0, 1.0, 1.0 );
+var materialDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialShininess = 20.0;
 
@@ -129,7 +130,10 @@ function makeGlobe() {
             var tr = spherePoint(lat + step, lon + step);   
 
             triangle(tl, tr, bl);
-            triangle(tr, br, bl);
+            heightsArray.push(htl, htr, hbl);
+            
+            triangle(tl, tr, bl);
+            heightsArray.push(htl, htr, hbl);
         }
     }
 }
@@ -201,6 +205,13 @@ function init() {
     gl.vertexAttribPointer( vNormal, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vNormal);
 
+    var hBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, hBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(heightsArray), gl.STATIC_DRAW);
+
+    var vHeight = gl.getAttribLocation(program, "vHeight");
+    gl.vertexAttribPointer(vHeight, 1, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vHeight);
 
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
