@@ -66,10 +66,9 @@ function triangle(a, b, c) {
 
           // normals are vectors
 
-     normalsArray.push(a[0],a[1], a[2], 0.0);
-     normalsArray.push(b[0],b[1], b[2], 0.0);
-     normalsArray.push(c[0],c[1], c[2], 0.0);
-
+     normalsArray.push(n[0], n[1], n[2], 0.0);
+     normalsArray.push(n[0], n[1], n[2], 0.0);
+     normalsArray.push(n[0], n[1], n[2], 0.0);
 
      index += 3;
 }
@@ -129,12 +128,16 @@ function makeGlobe() {
             var tl = spherePoint(lat + step, lon);          
             var tr = spherePoint(lat + step, lon + step);   
 
+            var hbl = height(lat, lon);
+            var hbr = height(lat, lon + step);
+            var htl = height(lat + step, lon);
+            var htr = height(lat + step, lon + step);
+
             triangle(tl, tr, bl);
             heightsArray.push(htl, htr, hbl);
             
-            triangle(tl, tr, bl);
-            heightsArray.push(htl, htr, hbl);
-        }
+            triangle(tr, br, bl);
+            heightsArray.push(htr, hbr, hbl);        }
     }
 }
 
