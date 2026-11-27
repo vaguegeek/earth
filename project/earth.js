@@ -52,6 +52,7 @@ var up = vec3(0.0, 1.0, 0.0);
 
 var step = 5;
 var spin = 1.0;
+var k = 0.15; 
 
 function triangle(a, b, c) {
 
@@ -69,13 +70,27 @@ function triangle(a, b, c) {
      index += 3;
 }
 
+function height(lat, lon) {
+    var dLat = lat - 37;             
+    var dLon = lon - 127;            
+
+    var x = Math.sqrt(dLat * dLat + dLon * dLon);   
+
+    if (x > 20) {                    
+        return 0;
+    }
+    return 1 - x / 20;               
+}
+
 function spherePoint(lat, lon) {
     var phi    = radians(lat);
     var lambda = radians(lon);
 
-    var x = Math.cos(phi) * Math.cos(lambda);
-    var y = Math.sin(phi);
-    var z = Math.cos(phi) * Math.sin(lambda);
+    var r = 1 + k * height(lat, lon);
+
+    var x = r * Math.cos(phi) * Math.cos(lambda);
+    var y = r * Math.sin(phi);
+    var z = r * Math.cos(phi) * Math.sin(lambda);
 
     return vec4(x, y, z, 1.0);
 }
